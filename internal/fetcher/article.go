@@ -1,6 +1,7 @@
 package fetcher
 
 import (
+	"bytes"
 	"crypto/md5"
 	"fmt"
 	"log"
@@ -147,19 +148,26 @@ func (a *Article) fetchTitle() (string, error) {
 		return "", fmt.Errorf("[%s] getTitle error, there is no element <title>", configs.Data.MS.Title)
 	}
 	title := n[0].FirstChild.Data
-	rp := strings.NewReplacer(" | 联合早报网", "", " | 早报", "")
-	title = strings.TrimSpace(rp.Replace(title))
+	title = strings.TrimSpace(title[:strings.Index(title, "|")])
 	gears.ReplaceIllegalChar(&title)
 	return title, nil
 }
 
 func (a *Article) fetchUpdateTime() (*timestamppb.Timestamp, error) {
 	if a.raw == nil {
-		return nil, errors.Errorf("[%s] fetchUpdateTime: raw is nil: %s", configs.Data.MS.Title, a.U.String())
+		return nil, fmt.Errorf("[%s] fetchUpdateTime: raw is nil: %s", configs.Data.MS.Title, a.U.String())
 	}
-	re := regexp.MustCompile(`"datePublished": "(.*?)",`)
-	rs := re.FindAllSubmatch(a.raw, -1)[0]
-	t, err := time.Parse(time.RFC3339, string(rs[1]))
+	re := regexp.MustCompile(`articleChangeDateShort: "(\d*?)",`)
+	rs := re.FindAllSubmatch(a.raw, -1)
+	if len(rs) <= 0 {
+		return nil, fmt.Errorf("[%s] fetchUpdateTime regex match nothing: %s",
+			configs.Data.MS.Title, a.U.String())
+	}
+	if len(rs[0]) <= 1 {
+		return nil, fmt.Errorf("[%s] fetchUpdateTime regex match nothing: %s",
+			configs.Data.MS.Title, a.U.String())
+	}
+	t, err := time.Parse("20060102", string(rs[0][1]))
 	if err != nil {
 		return nil, err
 	}
@@ -195,38 +203,73 @@ func (a *Article) filter(days int) (*Article, error) {
 }
 
 func (a *Article) fetchContent() (string, error) {
-	if a.doc == nil {
-		return "", errors.Errorf("[%s] fetchContent: doc is nil: %s", configs.Data.MS.Title, a.U.String())
+	if a.doc == nil || a.raw == nil {
+		return "", errors.Errorf("[%s] fetchContent: doc or raw is nil: %s", configs.Data.MS.Title, a.U.String())
 	}
 	body := ""
 	// Fetch content nodes
-	nodes := exhtml.ElementsByTagAndId(a.doc, "article", "article-body")
-	if len(nodes) == 0 {
-		nodes = exhtml.ElementsByTagAndClass(a.doc, "div", "article-content-rawhtml")
+	// Fetch summary
+	re := regexp.MustCompile(`<p class="intro">(.*?)</p>`)
+	raw := bytes.ReplaceAll(a.raw, []byte("\n"), []byte(""))
+	rs := re.FindAllSubmatch(raw, -1)
+	if rs == nil {
+		return "", errors.New("dw: dw: intro match nothing.")
 	}
-	if len(nodes) == 0 {
-		nodes = exhtml.ElementsByTagAndClass(a.doc, "div", "article-content-container")
+	if intro := string(rs[0][1]); intro != "" {
+		body += "> " + intro + "  \n\n" // if intro exist, append to body
 	}
+
+	// Fetch content
+	nodes := exhtml.ElementsByTagAndClass(a.doc, "div", "longText")
 	if len(nodes) == 0 {
-		return "", errors.Errorf("[%s] no content extract from %s", configs.Data.MS.Title, a.U.String())
+		return "", fmt.Errorf("[%s] nodes fetch error from: %s",
+			configs.Data.MS.Title, a.U.String())
 	}
-	plist := exhtml.ElementsByTag(nodes[0], "p")
+
+	x := nodes[0].FirstChild.NextSibling.Attr
+	if len(x) > 0 {
+		if x[0].Val == "col1" {
+			nodes[0].RemoveChild(nodes[0].FirstChild.NextSibling)
+		}
+	}
+
+	spanMerge := func(n *html.Node) []*html.Node {
+		spans := exhtml.ElementsByTag(n, "span")
+		for _, span := range spans {
+			if span.FirstChild != nil {
+				body += span.FirstChild.Data
+				if span.FirstChild.Data != span.LastChild.Data {
+					body += span.LastChild.Data
+				}
+			}
+		}
+		return spans
+	}
+
+	plist := exhtml.ElementsByTag(nodes[0], "p", "h2")
 	for _, v := range plist {
 		if v.FirstChild == nil {
 			continue
-		} else if v.FirstChild.FirstChild != nil &&
-			v.FirstChild.Data == "strong" {
-			a := exhtml.ElementsByTag(v, "span")
-			for _, aa := range a {
-				body += aa.FirstChild.Data
-			}
-			body += "  \n"
 		} else {
-			body += v.FirstChild.Data + "  \n"
+			switch v.Data {
+			case "h2":
+				body += "\n**"
+				if ss := spanMerge(v); len(ss) == 0 {
+					body += v.FirstChild.Data
+				}
+				body += "**   \n"
+			case "p":
+				if ss := spanMerge(v); len(ss) == 0 {
+					body += v.FirstChild.Data
+				}
+				body += "  \n"
+			default:
+				body += v.FirstChild.Data + "  \n"
+			}
 		}
 	}
-	body = strings.ReplaceAll(body, "span  \n", "")
-
+	rp := strings.NewReplacer("strong  \n", "", "em  \n", "", "**\n**   \n", "")
+	rp.Replace(body)
 	return body, nil
 }
 

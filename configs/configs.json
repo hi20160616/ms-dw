@@ -4,12 +4,9 @@
     "title":"dw",
     "domain":"www.dw.com",
     "url":[
-      "https://www.dw.com/realtime/world",
-      "https://www.dw.com/news/world",
-      "https://www.dw.com/realtime/china",
-      "https://www.dw.com/news/china"
+      "https://www.dw.com/zh/%E5%9C%A8%E7%BA%BF%E6%8A%A5%E5%AF%BC/s-9058"
     ],
-    "addr":":10002",
+    "addr":":10008",
     "timeout":"1s",
     "heartbeat":"5m"
   }

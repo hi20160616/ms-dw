@@ -16,8 +16,14 @@ func TestFetchArticle(t *testing.T) {
 		url string
 		err error
 	}{
-		{"https://www.dw.com/realtime/world/story20210602-1151196", ErrTimeOverDays},
-		{"https://www.dw.com/realtime/world/story20210607-1153241", nil},
+		{
+			"https://www.dw.com/zh/%E5%BE%B7%E5%9B%BD%E4%BC%9A%E4%B8%8D%E4%BC%9A%E7%BB%A7%E7%BB%AD%E6%98%AF-%E6%AC%A7%E6%B4%B2%E5%A6%93%E9%99%A2/a-56587170",
+			ErrTimeOverDays,
+		},
+		{
+			"https://www.dw.com/zh/%E7%BE%8E%E6%8A%A5%E5%91%8A%E7%A7%B0%E5%AE%9E%E9%AA%8C%E5%AE%A4%E5%A4%96%E6%B3%84%E5%81%87%E8%AE%BE%E5%8F%AF%E4%BF%A1-%E5%B8%83%E6%9E%97%E8%82%AF%E8%B4%A8%E7%96%91%E7%A0%94%E7%A9%B6%E6%96%B9%E6%B3%95/a-57821645",
+			nil,
+		},
 	}
 	for _, tc := range tests {
 		a := NewArticle()
@@ -39,8 +45,14 @@ func TestFetchTitle(t *testing.T) {
 		url   string
 		title string
 	}{
-		{"https://www.dw.com/realtime/world/story20210602-1151196", "马国男子腰缠巨蟒骑摩托车送往放生引热议"},
-		{"https://www.dw.com/realtime/world/story20210607-1153241", "以色列将于14日前投票批准新政府"},
+		{
+			"https://www.dw.com/zh/%E5%BE%B7%E5%9B%BD%E4%BC%9A%E4%B8%8D%E4%BC%9A%E7%BB%A7%E7%BB%AD%E6%98%AF-%E6%AC%A7%E6%B4%B2%E5%A6%93%E9%99%A2/a-56587170",
+			"德国会不会继续是 ″欧洲妓院″？",
+		},
+		{
+			"https://www.dw.com/zh/%E7%BE%8E%E6%8A%A5%E5%91%8A%E7%A7%B0%E5%AE%9E%E9%AA%8C%E5%AE%A4%E5%A4%96%E6%B3%84%E5%81%87%E8%AE%BE%E5%8F%AF%E4%BF%A1-%E5%B8%83%E6%9E%97%E8%82%AF%E8%B4%A8%E7%96%91%E7%A0%94%E7%A9%B6%E6%96%B9%E6%B3%95/a-57821645",
+			"美报告称实验室外泄假设可信 布林肯质疑研究方法",
+		},
 	}
 	for _, tc := range tests {
 		a := NewArticle()
@@ -76,12 +88,12 @@ func TestFetchUpdateTime(t *testing.T) {
 		want string
 	}{
 		{
-			"https://www.dw.com/realtime/world/story20210602-1151196",
-			"2021-06-02 15:44:33 +0800 UTC",
+			"https://www.dw.com/zh/%E5%BE%B7%E5%9B%BD%E4%BC%9A%E4%B8%8D%E4%BC%9A%E7%BB%A7%E7%BB%AD%E6%98%AF-%E6%AC%A7%E6%B4%B2%E5%A6%93%E9%99%A2/a-56587170",
+			"2021-02-20 08:00:00 +0800 UTC",
 		},
 		{
-			"https://www.dw.com/realtime/world/story20210607-1153241",
-			"2021-06-07 21:38:53 +0800 UTC",
+			"https://www.dw.com/zh/%E7%BE%8E%E6%8A%A5%E5%91%8A%E7%A7%B0%E5%AE%9E%E9%AA%8C%E5%AE%A4%E5%A4%96%E6%B3%84%E5%81%87%E8%AE%BE%E5%8F%AF%E4%BF%A1-%E5%B8%83%E6%9E%97%E8%82%AF%E8%B4%A8%E7%96%91%E7%A0%94%E7%A9%B6%E6%96%B9%E6%B3%95/a-57821645",
+			"2021-06-09 08:00:00 +0800 UTC",
 		},
 	}
 	var err error
@@ -119,12 +131,12 @@ func TestFetchContent(t *testing.T) {
 		want string
 	}{
 		{
-			"https://www.dw.com/realtime/world/story20210602-1151196",
-			"2021-06-02 15:44:33 +0800 UTC",
+			"https://www.dw.com/zh/%E5%BE%B7%E5%9B%BD%E4%BC%9A%E4%B8%8D%E4%BC%9A%E7%BB%A7%E7%BB%AD%E6%98%AF-%E6%AC%A7%E6%B4%B2%E5%A6%93%E9%99%A2/a-56587170",
+			"2021-02-20 08:00:00 +0800 UTC",
 		},
 		{
-			"https://www.dw.com/realtime/world/story20210607-1153241",
-			"2021-06-07 21:38:53 +0800 UTC",
+			"https://www.dw.com/zh/%E7%BE%8E%E6%8A%A5%E5%91%8A%E7%A7%B0%E5%AE%9E%E9%AA%8C%E5%AE%A4%E5%A4%96%E6%B3%84%E5%81%87%E8%AE%BE%E5%8F%AF%E4%BF%A1-%E5%B8%83%E6%9E%97%E8%82%AF%E8%B4%A8%E7%96%91%E7%A0%94%E7%A9%B6%E6%96%B9%E6%B3%95/a-57821645",
+			"2021-06-09 08:00:00 +0800 UTC",
 		},
 	}
 	var err error
