@@ -1,0 +1,16 @@
+{
+  "dbpath":"db",
+  "microservice":{
+    "title":"dw",
+    "domain":"www.dw.com",
+    "url":[
+      "https://www.dw.com/realtime/world",
+      "https://www.dw.com/news/world",
+      "https://www.dw.com/realtime/china",
+      "https://www.dw.com/news/china"
+    ],
+    "addr":":10002",
+    "timeout":"1s",
+    "heartbeat":"5m"
+  }
+}
