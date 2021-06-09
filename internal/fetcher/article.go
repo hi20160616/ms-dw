@@ -226,10 +226,18 @@ func (a *Article) fetchContent() (string, error) {
 			configs.Data.MS.Title, a.U.String())
 	}
 
-	x := nodes[0].FirstChild.NextSibling.Attr
-	if len(x) > 0 {
-		if x[0].Val == "col1" {
-			nodes[0].RemoveChild(nodes[0].FirstChild.NextSibling)
+	x := nodes[0]
+	if x != nil {
+		x = x.FirstChild
+		if x != nil {
+			x = x.NextSibling
+			if x != nil {
+				if len(x.Attr) > 0 {
+					if x.Attr[0].Val == "col1" {
+						nodes[0].RemoveChild(nodes[0].FirstChild.NextSibling)
+					}
+				}
+			}
 		}
 	}
 
