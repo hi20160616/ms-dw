@@ -8,6 +8,6 @@
     ],
     "addr":":10008",
     "timeout":"1s",
-    "heartbeat":"5m"
+    "heartbeat":"24h"
   }
 }
