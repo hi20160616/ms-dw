@@ -1,13 +1,6 @@
 {
-  "dbpath":"db",
-  "microservice":{
-    "title":"dw",
-    "domain":"www.dw.com",
-    "url":[
-      "https://www.dw.com/zh/%E5%9C%A8%E7%BA%BF%E6%8A%A5%E5%AF%BC/s-9058"
-    ],
-    "addr":":10008",
-    "timeout":"1s",
-    "heartbeat":"1h"
-  }
+  "debug":false,
+  "verbose":false,
+  "gist": "https://gist.github.com/hi20160616/bfcb9f8521d17aa4f65cf14b79550e23/raw/configs1.json",
+  "dbpath":"db"
 }
